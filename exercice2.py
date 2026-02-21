@@ -20,7 +20,6 @@ Structure d'une intervention (dict) :
 - Utiliser 0 par défaut pour urgence et duree
 - Utiliser False par défaut pour critique
 """
-
 # -------------------------------------------------------------------
 # 1) Calcul de priorité
 # -------------------------------------------------------------------
@@ -45,9 +44,14 @@ def calculer_priorite(intervention):
     score = 0
 
     # TODO 1 : Récupérer urgence, duree, critique avec .get()
+    urgence = intervention.get('urgence', 0)
+    duree = intervention.get('duree', 0)
+    critique = int(intervention.get('critique', False))
 
     # TODO 2 : Calculer le score selon la formule
     #          Penser à convertir critique en 1/0 
+
+    score = urgence*2 + duree + critique*10
 
     return score
 
@@ -74,13 +78,27 @@ def trier_interventions(liste_interventions):
     Returns:
         list: nouvelle liste triée (idéalement, ne pas modifier l'original)
     """
-
+    for itv in liste_interventions :
+        itv['score'] = calculer_priorite(itv)
     # TODO 1 : Créer une copie de la liste pour éviter les effets de bord
-    #          Indice : interventions = liste_interventions[:]
-
+    
+    interventions = liste_interventions[:]
+    
     # TODO 2 : Implémenter un tri stable décroissant
     # Astuce stabilité :
     # - si score_i == score_j, NE PAS échanger
+
+    # Bubble sort (bruteforce n'est parfois pas stable) 
+    n = len(interventions)
+
+    for i in range(n):
+        for j in range(0, n - i - 1):
+
+            score_j = calculer_priorite(interventions[j])
+            score_proch = calculer_priorite(interventions[j + 1])
+
+            if score_proch > score_j:
+                interventions[j], interventions[j + 1] = interventions[j + 1], interventions[j]
 
     return interventions
 
@@ -111,7 +129,15 @@ def estimer_temps_interventions(liste_triee):
     }
 
     # TODO 1 : Calculer le temps total
+    for itv in liste_triee :
+        temps_stats['temps_total'] += itv['duree']*4
+
     # TODO 2 : Calculer le temps moyen (0 si liste vide)
+    if len(liste_triee) == 0 : 
+        return temps_stats
+    #Dict déjà initialisé à 0
+
+    temps_stats['temps_moyen'] = temps_stats['temps_total']/len(liste_triee)
 
     return temps_stats
 
@@ -142,6 +168,13 @@ def identifier_interventions_urgentes(liste, seuil=30):
     #   - si urgence > seuil, ajouter l'id.
     # ⚠️ Si 'id' manquant, tu peux ignorer l'intervention ou ajouter None
     # (au choix, mais rester cohérent)
+
+    for itv in liste :
+        # Variable temporaire pour ne pas modifier directement la liste
+        urgence = itv.get('urgence', 0)
+
+        if urgence > seuil:
+            urgentes.append(itv.get('id'))
 
     return urgentes
 
