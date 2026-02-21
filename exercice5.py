@@ -209,7 +209,7 @@ def generer_rapport_global(categories, problemes):
         rapport['score_moyen'] = score_total / nb_total
     else:
         rapport['score_moyen'] = 0.0
-    # TODO 2 : trouver les 3 problèmes les plus fréquents sans utiliser sorted(), un tri simple type “sélection des max” est suffisant.)
+    # TODO 2 : trouver les 3 problèmes les plus fréquents sans utiliser sorted(), un tri simple type “sélection des max” est suffisant)
     for key, value in problemes.items() :
         if value < 1 : continue
 
@@ -226,14 +226,15 @@ def generer_rapport_global(categories, problemes):
             if value > valeur_min :
                 rapport['top_problemes'].remove(mot_min)
                 rapport['top_problemes'].append(key)
-    # Trier top_problemes
+    # Trier top problemes (mini tri bulles)
     top = rapport['top_problemes']
-    if problemes[top[0]] < problemes[top[1]] :
-        top[0], top[1] = top[1], top[0]
-    if problemes[top[1]] < problemes[top[2]] :
-        top[1], top[2] = top[2], top[1]
-    if problemes[top[0]] < problemes[top[1]] :
-        top[0], top[1] = top[1], top[0]
+    if (len(top) == 3) :
+        if problemes[top[0]] < problemes[top[1]] :
+            top[0], top[1] = top[1], top[0]
+        if problemes[top[1]] < problemes[top[2]] :
+            top[1], top[2] = top[2], top[1]
+        if problemes[top[0]] < problemes[top[1]] :
+            top[0], top[1] = top[1], top[0]
         
     return rapport
 

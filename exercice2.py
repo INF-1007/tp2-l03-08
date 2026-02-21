@@ -167,13 +167,13 @@ def identifier_interventions_urgentes(liste, seuil=30):
     # Parcourir la liste
     #   - si urgence > seuil, ajouter l'id.
     # ⚠️ Si 'id' manquant, tu peux ignorer l'intervention ou ajouter None
-    # (au choix, mais rester cohérent)
+    # (au choix, mais rester cohérent.)
 
     for itv in liste :
         # Variable temporaire pour ne pas modifier directement la liste
         urgence = itv.get('urgence', 0)
 
-        if urgence > seuil:
+        if (urgence > seuil) :
             urgentes.append(itv.get('id'))
 
     return urgentes
