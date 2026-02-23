@@ -58,7 +58,11 @@ def verifier_ressources(ressources, besoin):
     #   - si stock actuel < quantite requise :
     #         peut_faire = False
     #         mettre à jour la liste "manquantes"
-
+    for type, quantite in besoin.items() : 
+        stock_actuel = ressources.get(type, 0)
+        if stock_actuel < quantite : 
+            peut_faire = False
+            manquantes.append(type)
     return peut_faire, manquantes
 
 
@@ -88,6 +92,9 @@ def mettre_a_jour_ressources(ressources, besoin, cycles=1):
     #   - calculer la consommation
     #   - mettre à jour le dictionnaire "nouvelles"
     # (On suppose que les données fournies sont cohérentes; pas besoin de borner à 0)
+    for nom, quantite in besoin.items() : 
+        conso_total = quantite * cycles 
+        nouvelles[nom] = nouvelles.get(nom, 0) - conso_total
 
     return nouvelles
 
@@ -122,7 +129,10 @@ def generer_alertes_ressources(ressources, seuil=50):
     #   - si stock < seuil :
     #         calculer a_commander
     #         mettre à jour alertes
-
+    for nom, quantite in ressources.items() :
+        if quantite < seuil : 
+            a_commander = niveau_cible - quantite
+            alertes[nom] = (quantite, a_commander)
     return alertes
 
 
@@ -155,7 +165,17 @@ def calculer_cycles_possibles(ressources, consommations):
     #   - une ressource est considérée valide si conso > 0
     #   - si aucune ressource valide (toutes conso==0), décider nb_cycles=0 
     #   - mettre à jour "possibles"
-
+    for activite, besoin in consommations.items() : 
+        limites = []
+        for nom, conso_unitaire in besoin.items() : 
+            if conso_unitaire > 0 :
+                stock = ressources.get(nom, 0)
+                nb_cycles = stock // conso_unitaire 
+                limites.append(nb_cycles)
+        if limites : 
+            possibles[activite] = min(limites)
+        else : 
+            possibles[activite] = 0 
     return possibles
 
 
@@ -194,7 +214,20 @@ Returns:
     # TODO 3 : Parcourir les ressources par priorité :
     #          - calculer la quantite max achetable
     #          - acheter la quantite requise et soustraire du budget
-
+    manques = {}
+    for nom, quantite in ressources.items() : 
+        stock = ressources.get(nom, 0)
+        if stock < besoins_prevus[nom] : 
+            manques[nom] = besoins_prevus[nom] - quantite 
+    manques_trie = dict(sorted(manques.items(), key = lambda x: x[1], reverse=True))
+    for nom_manque, quantite_manque in manques_trie.items() : 
+        prix_unitaire = COUTS_UNITAIRES.get(nom_manque, 0)
+        if prix_unitaire > 0 : 
+            qte_max_achetable = budget//prix_unitaire
+            qte_requise = min(quantite_manque, qte_max_achetable)
+            if qte_requise > 0 : 
+                achats[nom_manque] = qte_requise
+                budget -= qte_requise * prix_unitaire
     return achats
 
 
